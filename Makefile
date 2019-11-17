@@ -32,11 +32,11 @@ BUILD		:=	build
 DATA		:=	data
 SOURCES		:=	source source/text
 INCLUDES	:=	include
-# ROMFS		:=	romfs
+ROMFS		:=	romfs
 
-APP_TITLE		:=	PHBankGB
-APP_DESCRIPTION	:=	Pokémon Homebrew Bank GB
-APP_AUTHOR		:=	Gocario
+APP_TITLE		:=	PHBankGBC
+APP_DESCRIPTION	:=	Pokémon Homebrew Bank GBC
+APP_AUTHOR		:=	Gocario - JoycieC - B0lu
 
 NO_SMDH			:=	NO_SMDH
 ICON 			:=	assets/icon-48px.png
