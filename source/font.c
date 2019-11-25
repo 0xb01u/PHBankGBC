@@ -2,8 +2,7 @@
 #include "save.h"
 #include "pkdir.h"
 
-#include <sf2d.h>
-#include <sfil.h>
+#include <citro2d.h>
 
 #define CHAR_SIZE (8)
 

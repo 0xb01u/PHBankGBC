@@ -32,7 +32,7 @@ BUILD		:=	build
 DATA		:=	data
 SOURCES		:=	source source/text
 INCLUDES	:=	include
-ROMFS		:=	romfs
+#ROMFS		:=	romfs
 
 APP_TITLE		:=	PHBankGBC
 APP_DESCRIPTION	:=	Pokémon Homebrew Bank GBC

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <sf2d.h>
+#include <citro2d.h>
 
 #include "pokedex.h"
 

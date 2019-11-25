@@ -60,7 +60,7 @@ static Result TS_Init(void)
 	{
 		debug_print("Texturing %li\n", i);
 		titleIcons[i] = sf2d_create_texture(48, 48, TEXFMT_RGB565, SF2D_PLACE_RAM);
-		u16* dst = (u16*)(titleIcons[i]->data + 64 * 8 * 2 * sizeof(u16));
+		u16* dst = (u16*)(titleIcons[i]->tex.data + 64 * 8 * 2 * sizeof(u16));
 		u16* src = (u16*)(titleList[i].smdh->bigIconData);
 		for (u8 j = 0; j < 48; j += 8)
 		{
