@@ -1,8 +1,8 @@
 build/
-PHBankGB.elf
-PHBankGB.3dsx
-PHBankGB.smdh
-PHBankGB.xml
-PHBankGB.cia
-assets/graphics/251pkmn.png
-assets/graphics/sprites/transparent.py
+PHBankGBC.elf
+PHBankGBC.3dsx
+PHBankGBC.smdh
+PHBankGBC.xml
+PHBankGBC.cia
+assets/romfs/251pkmn.png
+assets/romfs/sprites/transparent.py

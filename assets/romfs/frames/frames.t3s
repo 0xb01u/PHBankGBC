@@ -1,0 +1,8 @@
+--atlas -f rgba8888 -z auto
+frame_gbc_red.png
+frame_gbc_blue.png
+frame_gbc_green.png
+frame_gbc_yellow.png
+frame_gbc_gold.png
+frame_gbc_silver.png
+frame_gbc_crystal.png
