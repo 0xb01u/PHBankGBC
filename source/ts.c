@@ -1,8 +1,7 @@
 #include "ts.h"
 #include "key.h"
 
-#include <sf2d.h>
-#include <stdlib.h>
+#include <citro2d.h>
 #include <string.h>
 
 // #define TS_DEBUG
@@ -21,7 +20,7 @@ AM_TitleMediaEntry titleEntry;
 static u32 titleCount;
 static s32 titleCurrent;
 static AM_TitleMediaEntry* titleList;
-static sf2d_texture** titleIcons;
+static C2D_Image** titleIcons;
 
 /**
  * @brief Updates the output title enty.
@@ -54,13 +53,19 @@ static Result TS_Init(void)
 
 	debug_print("Got: %li titles\n", titleCount);
 
-	titleIcons = (sf2d_texture**) malloc(titleCount * sizeof(sf2d_texture*));
+	titleIcons = (C2D_Image**) malloc(titleCount * sizeof(C2D_Image*));
 
 	for (u32 i = 0; i < titleCount; i++)
 	{
+		// TODO: Add security checkers.
 		debug_print("Texturing %li\n", i);
-		titleIcons[i] = sf2d_create_texture(48, 48, TEXFMT_RGB565, SF2D_PLACE_RAM);
-		u16* dst = (u16*)(titleIcons[i]->tex.data + 64 * 8 * 2 * sizeof(u16));
+
+		titleIcons[i] = calloc(1, sizeof(*titleIcons[i]));
+		C3D_TexInit(titleIcons[i]->tex, 64, 64, 3);	// 3 is TEXFMT_RGB565 in sf2dlib
+		C3D_TexSetWrap(titleIcons[i]->tex, GPU_CLAMP_TO_BORDER, GPU_CLAMP_TO_BORDER);
+		*titleIcons[i]->subtex = { 48, 48, 0.0f, 1.0f, 1.0f, 0.0f };
+
+		u16* dst = (u16*)(titleIcons[i]->tex->data + 64 * 8 * 2 * sizeof(u16));
 		u16* src = (u16*)(titleList[i].smdh->bigIconData);
 		for (u8 j = 0; j < 48; j += 8)
 		{
@@ -69,8 +74,6 @@ static Result TS_Init(void)
 			dst += 64 * 8;
 		}
 	}
-
-	sf2d_set_clear_color(RGBA8(0x40,0x40,0x40,0xFF));
 
 	debug_print("Textured\n");
 
@@ -164,75 +167,32 @@ bool TS_Loop(void)
 #ifdef TS_DEBUG
 		gspWaitForVBlank();
 #else
-		sf2d_start_frame(GFX_TOP, GFX_LEFT);
+		C3D_RenderTarget* top = C2D_CreateScreenTarget(GFX_TOP, GFX_LEFT);
+		C3D_RenderTarget* bottom = C2D_CreateScreenTarget(GFX_BOTTOM, GFX_LEFT);
+		u32 white = C2D_Color32(0xf8, 0xf8, 0xf8, 0xff);
+
+		C3D_FrameBegin(C3D_FRAME_SYNCDRAW);
+		C2D_TargetClear(top, white);
+
+		C2D_SceneBegin(top);
 		{
-			// sf2d_draw_rectangle(151, 63, titleIcons[titleCurrent]->width*2+2, titleIcons[titleCurrent]->height*2+2, RGBA8(0xFF,0xAA,0x55,0xFF));
-			// sf2d_draw_rectangle(152, 64, titleIcons[titleCurrent]->width*2, titleIcons[titleCurrent]->height*2, RGBA8(0x55,0xAA,0xFF,0xFF));
-
-			// sf2d_draw_rectangle( 63, 95, titleIcons[titleCurrent]->width+2, titleIcons[titleCurrent]->height+2, RGBA8(0xAA,0x88,0x55,0xFF));
-			// sf2d_draw_rectangle( 64, 96, titleIcons[titleCurrent]->width, titleIcons[titleCurrent]->height, RGBA8(0x55,0x88,0xAA,0xFF));
-
-			// sf2d_draw_rectangle(287, 95, titleIcons[titleCurrent]->width+2, titleIcons[titleCurrent]->height+2, RGBA8(0xAA,0x88,0x55,0xFF));
-			// sf2d_draw_rectangle(288, 96, titleIcons[titleCurrent]->width, titleIcons[titleCurrent]->height, RGBA8(0x55,0x88,0xAA,0xFF));
-
+			// Center
 			if (titleCount > 0)
-			{
-				sf2d_draw_texture_scale(titleIcons[titleCurrent], 152, 160, 2.0f, -2.0f);
+				C2D_DrawImageAt(*titleIcons[titleCurrent], 152.0f, 160.0f, 0.0f, NULL, 2.0f, -2.0f);
 
-				// sf2d_draw_texture_scale(titleIcons[titleCurrent], 152, 64, 2.0f, 2.0f);
-
-				if (titleList[titleCurrent].mediatype == MEDIATYPE_GAME_CARD)
-				{
-					sf2d_draw_rectangle(248, 64, 8, 16, RGBA8(0xFF,0xFF,0xFF,0xFF));
-				}
-			}
-
+			// Left
 			if (titleCurrent > 0)
-			{
-				sf2d_draw_texture_scale(titleIcons[titleCurrent-1], 64, 144, 1.0f, -1.0f);
-
-				// sf2d_draw_texture(titleIcons[titleCurrent-1], 64, 96);
-
-				if (titleList[titleCurrent-1].mediatype == MEDIATYPE_GAME_CARD)
-				{
-					sf2d_draw_rectangle(112, 96, 4, 8, RGBA8(0xFF,0xFF,0xFF,0xFF));
-				}
-			}
+				C2D_DrawImageAt(*titleIcons[titleCurrent-1], 64.0f, 144.0f, 0.0f, NULL, 1.0f, -1.0f);
 			else if (titleCurrent < titleCount-1)
-			{
-				sf2d_draw_texture_scale(titleIcons[titleCount-1], 64, 144, 1.0f, -1.0f);
+				C2D_DrawImageAt(*titleIcons[titleCount-1], 64.0f, 144.0f, 0.0f, NULL, 1.0f, -1.0f);
 
-				if (titleList[titleCount-1].mediatype == MEDIATYPE_GAME_CARD)
-				{
-					sf2d_draw_rectangle(112, 96, 4, 8, RGBA8(0xFF,0xFF,0xFF,0xFF));
-				}
-			}
-
+			// Right
 			if (titleCurrent < titleCount-1)
-			{
-				sf2d_draw_texture_scale(titleIcons[titleCurrent+1], 288, 144, 1.0f, -1.0f);
-
-				// sf2d_draw_texture(titleIcons[titleCurrent+1], 288, 96);
-
-				if (titleList[titleCurrent+1].mediatype == MEDIATYPE_GAME_CARD)
-				{
-					sf2d_draw_rectangle(336, 96, 4, 8, RGBA8(0xFF,0xFF,0xFF,0xFF));
-				}
-			}
+				C2D_DrawImageAt(*titleIcons[titleCurrent+1], 288.0f, 144.0f, 0.0f, NULL, 1.0f, -1.0f);
 			else if (titleCurrent > 0)
-			{
-				sf2d_draw_texture_scale(titleIcons[0], 288, 144, 1.0f, -1.0f);
-
-				if (titleList[0].mediatype == MEDIATYPE_GAME_CARD)
-				{
-					sf2d_draw_rectangle(336, 96, 4, 8, RGBA8(0xFF,0xFF,0xFF,0xFF));
-				}
-			}
+				C2D_DrawImageAt(*titleIcons[0], 288.0f, 144.0f, 0.0f, NULL, 1.0f, -1.0f);
 		}
-		sf2d_end_frame();
-		sf2d_start_frame(GFX_BOTTOM, GFX_LEFT);
-		sf2d_end_frame();
-		sf2d_swapbuffers();
+		C3D_FrameEnd(0);
 #endif
 	}
 

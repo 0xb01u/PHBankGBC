@@ -49,7 +49,7 @@ typedef struct
 	SAV_Pokemon* vPkm;
 	SAV_Pokemon* sPkm;
 	bool isPkmDragged : 1;
-	unsigned:7;
+	unsigned : 7;
 
 } CursorBox;
 
@@ -113,8 +113,6 @@ void boxViewerInitialize(void)
 	cursor.box = &cursor.bk; boxSelectViewBox();
 	cursor.box = &cursor.pc; boxSelectViewBox();
 	boxSelectViewPkm();
-
-	sf2d_set_clear_color(RGBA8(0xF8,0xF8,0xF8,0xFF));
 }
 
 void boxViewerUpdate(void)
@@ -508,13 +506,21 @@ static void boxViewerDrawBottom(void)
 
 void boxViewerDraw(void)
 {
-	sf2d_start_frame(GFX_TOP, GFX_LEFT);
+	C3D_RenderTarget* top = C2D_CreateScreenTarget(GFX_TOP, GFX_LEFT);
+	C3D_RenderTarget* bottom = C2D_CreateScreenTarget(GFX_BOTTOM, GFX_LEFT);
+	u32 white = C2D_Color32(0xf8, 0xf8, 0xf8, 0xff);
+
+	C3D_FrameBegin(C3D_FRAME_SYNCDRAW);
+	C2D_TargetClear(top, white);
+	C2D_TargetClear(bottom, white);
+
+	C2D_SceneBegin(top);
 		boxViewerDrawTop();
-	sf2d_end_frame();
-	sf2d_start_frame(GFX_BOTTOM, GFX_LEFT);
+
+	C2D_SceneBegin(bottom);
 		boxViewerDrawBottom();
-	sf2d_end_frame();
-	sf2d_swapbuffers();
+
+	C3D_FrameEnd(0);
 }
 
 static void boxDrawBox(CursorInbox* cursorin, int16_t x, int16_t y)
