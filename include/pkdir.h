@@ -14,11 +14,11 @@
  * @brief Shared folders.
  */
 #define ROOT_FOLDER "/"
-#define BASE_FOLDER "/pk/"
-#define DATA_FOLDER "/pk/data/"
-#define ROMFS_FOLDER "/pk/romfs/"
+#define BASE_FOLDER ROOT_FOLDER
+#define DATA_FOLDER "/data/"
+#define ROMFS_FOLDER "/assets/romfs/"
 
 /**
  * @brief Brew folders.
  */
-#define BANK_FOLDER "/pk/bank/"
+#define BANK_FOLDER "/bank/"

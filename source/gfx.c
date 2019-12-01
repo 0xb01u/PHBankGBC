@@ -3,56 +3,63 @@
 #include "save.h"
 #include "pkdir.h"
 
-#include <sfil.h>
+#include <citro2d.h>
 
 #define PKM_PER_ROW (8)
 #define ROMFS ROMFS_FOLDER
 
-static sf2d_texture* pkmIconsGBC;
-static sf2d_texture* topFrame;
+static C2D_SpriteSheet pkmIconsGBC;
+static C2D_SpriteSheet frames;
+static C2D_Image topFrame;
 
 Result gfxLoad(void)
 {
-	pkmIconsGBC = sfil_load_PNG_file(ROMFS "pokemon_icons_gbc.png", SF2D_PLACE_RAM);
+	pkmIconsGBC = C2D_SpriteSheetLoad(ROMFS "sprites/pkmn_icons.t3x");
 
 	return (pkmIconsGBC ? 0 : -5);
 }
 
 Result gfxLoadFrame(uint64_t titleid)
 {
+	frames = C2D_SpriteSheetLoad(ROMFS "frames/frames.t3x");
+	int i = 7;
+
 	switch (saveGetGameVersion(titleid))
 	{
-		case POKEMON_RED: topFrame = sfil_load_PNG_file(ROMFS "frame_gbc_red.png", SF2D_PLACE_RAM); break;
-		case POKEMON_GREEN: topFrame = sfil_load_PNG_file(ROMFS "frame_gbc_green.png", SF2D_PLACE_RAM); break;
-		case POKEMON_BLUE: topFrame = sfil_load_PNG_file(ROMFS "frame_gbc_blue.png", SF2D_PLACE_RAM); break;
-		case POKEMON_YELLOW: topFrame = sfil_load_PNG_file(ROMFS "frame_gbc_yellow.png", SF2D_PLACE_RAM); break;
-		case POKEMON_CRYSTAL: topFrame = sfil_load_PNG_file(ROMFS "frame_gbc_crystal.png", SF2D_PLACE_RAM); break;
-		default: topFrame = NULL; break;
+		case POKEMON_RED: i--;
+		case POKEMON_GREEN: i--;
+		case POKEMON_BLUE: i--;
+		case POKEMON_YELLOW: i--;
+		case POKEMON_GOLD: i--;
+		case POKEMON_SILVER: i--;
+		case POKEMON_CRYSTAL: i--; break;
 	}
+
+	topFrame = C2D_SpriteSheetGetImage(frames, i);
 
 	return (topFrame ? 0 : -5);
 }
 
 void gfxFree(void)
 {
-	sf2d_free_texture(pkmIconsGBC);
+	C2D_SpriteSheetFree(pkmIconsGBC);
 }
 
 void gfxFreeFrame(void)
 {
-	sf2d_free_texture(topFrame);
+	C2D_SpriteSheetFree(frames);
 }
 
 void gfxDrawPokemonIcon(int16_t x, int16_t y, DEX_Species icon, GFX_Frame frame)
 {
 	if (icon > SPECIES_MEW) icon = SPECIES_MISSINGNO;
 
-	sf2d_draw_texture_part(pkmIconsGBC, x, y, 16 * (frame + (icon % PKM_PER_ROW) * 2), 16 * (icon / PKM_PER_ROW), 16, 16);
+	C2D_DrawImageAt(C2D_SpriteSheetGetImage(pkmIconsGBC, icon), (float) x, (float) y, 0.0f);
 }
 
 void gfxDrawFrame(int16_t x, int16_t y)
 {
-	sf2d_draw_texture(topFrame, x, y);
+	C2D_DrawImageAt(topFrame, (float) x, (float) y);
 }
 
 void gfxDrawPanel(int16_t x, int16_t y, uint8_t w, uint8_t h)
