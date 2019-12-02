@@ -54,7 +54,7 @@ void gfxDrawPokemonIcon(int16_t x, int16_t y, DEX_Species icon, GFX_Frame frame)
 {
 	if (icon > SPECIES_MEW) icon = SPECIES_MISSINGNO;
 
-	C2D_DrawImageAt(C2D_SpriteSheetGetImage(pkmIconsGBC, icon), (float) x, (float) y, 0.0f);
+	C2D_DrawImageAt(C2D_SpriteSheetGetImage(pkmIconsGBC, 2 * icon + frame), (float) x, (float) y, 0.0f);
 }
 
 void gfxDrawFrame(int16_t x, int16_t y)
